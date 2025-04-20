@@ -1,0 +1,6 @@
+@HallyuVault.Api_HostAddress = http://localhost:5016
+
+GET {{HallyuVault.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
