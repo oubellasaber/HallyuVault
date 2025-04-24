@@ -3,7 +3,7 @@ using HallyuVault.Etl.FileCryptExtractor.Entities.FileCryptHeader;
 using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
 
-namespace HallyuVault.Etl.FileCryptExtractor.DomainServices.LinkResolvingService;
+namespace HallyuVault.Etl.FileCryptExtractor.DomainServices;
 
 public sealed class LinkResolvingService
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Text.Json;
 
-namespace HallyuVault.Etl.Crawler
+namespace HallyuVault.Etl.Fetcher
 {
     public class DramaDayApiClient : IDramaDayApiClient
     {

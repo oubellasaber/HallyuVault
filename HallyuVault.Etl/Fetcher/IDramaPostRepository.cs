@@ -1,4 +1,4 @@
-﻿namespace HallyuVault.Etl.Crawler
+﻿namespace HallyuVault.Etl.Fetcher
 {
     public interface IDramaPostRepository
     {

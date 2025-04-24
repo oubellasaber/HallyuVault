@@ -1,6 +1,5 @@
 ﻿using HallyuVault.Etl.ApiKeyRotator.ScraperApi;
-using HallyuVault.Etl.FileCryptExtractor.DomainServices.LinkResolvingService;
-using HallyuVault.Etl.FileCryptExtractor.DomainServices.RowParsingService;
+using HallyuVault.Etl.FileCryptExtractor.DomainServices;
 using HallyuVault.Etl.FileCryptExtractor.Entities.FileCryptHeader;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

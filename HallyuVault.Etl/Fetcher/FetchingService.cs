@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 
-namespace HallyuVault.Etl.Crawler
+namespace HallyuVault.Etl.Fetcher
 {
     public class FetchingService
     {

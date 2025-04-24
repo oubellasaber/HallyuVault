@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using System.Web;
 
-namespace HallyuVault.Etl.Crawler
+namespace HallyuVault.Etl.Fetcher
 {
     public class DramaPostConverter : JsonConverter<DramaPost>
     {

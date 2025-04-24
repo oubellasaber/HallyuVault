@@ -1,4 +1,4 @@
-﻿using HallyuVault.Etl.FileCryptExtractor.DomainServices.RowParsingService;
+﻿using HallyuVault.Etl.FileCryptExtractor.DomainServices;
 using HallyuVault.Etl.FileCryptExtractor.Entities.Rows;
 using HtmlAgilityPack;
 
@@ -12,7 +12,7 @@ public class FileCryptContainer
     public string Title { get; private set; }
     private readonly HtmlDocument _doc;
 
-    public IEnumerable<Row> Rows => _rows;
+    public IReadOnlyCollection<Row> Rows => _rows;
 
     public FileCryptContainer(Uri url, HtmlDocument doc)
     {

@@ -1,5 +1,5 @@
 ﻿using HallyuVault.Core.Abstractions;
-using HallyuVault.Etl.FileCryptExtractor.DomainServices.RowParsingService;
+using HallyuVault.Etl.FileCryptExtractor.DomainServices;
 using HallyuVault.Etl.FileCryptExtractor.Entities.FileCryptContainer;
 using HallyuVault.Etl.FileCryptExtractor.Entities.FileCryptHeader;
 using HtmlAgilityPack;

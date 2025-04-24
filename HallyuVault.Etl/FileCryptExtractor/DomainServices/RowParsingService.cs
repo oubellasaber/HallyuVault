@@ -6,13 +6,13 @@ using HallyuVault.Etl.FileCryptExtractor.Entities.Rows.ValueObjects;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
 
-namespace HallyuVault.Etl.FileCryptExtractor.DomainServices.RowParsingService;
+namespace HallyuVault.Etl.FileCryptExtractor.DomainServices;
 
 public sealed class RowParsingService
 {
-    private readonly LinkResolvingService.LinkResolvingService _linkResolvingService;
+    private readonly LinkResolvingService _linkResolvingService;
 
-    public RowParsingService(LinkResolvingService.LinkResolvingService linkResolvingService)
+    public RowParsingService(LinkResolvingService linkResolvingService)
     {
         _linkResolvingService = linkResolvingService;
     }
