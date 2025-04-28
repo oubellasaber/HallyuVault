@@ -2,5 +2,5 @@
 
 namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing.SpecialEpisodeParsing
 {
-    internal interface ISpecialEpisodeValidator : IHtmlNodeValidator;
+    public interface ISpecialEpisodeValidator : IHtmlNodeValidator;
 }

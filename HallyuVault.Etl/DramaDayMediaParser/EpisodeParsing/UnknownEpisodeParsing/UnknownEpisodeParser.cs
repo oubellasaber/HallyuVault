@@ -1,18 +1,17 @@
 ﻿using HallyuVault.Core.Abstractions;
 using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
-using HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing;
 using HallyuVault.Etl.Models;
 using HtmlAgilityPack;
 
 namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing.UnknownEpisodeParsing
 {
-    public class UnknownEpisodeParser : HtmlNodeParser<UnknownEpisode>, ISpecializedEpisodeParser<UnknownEpisode>
+    public class UnknownEpisodeParser : HtmlNodeParser<Episode>
     {
-        public UnknownEpisodeParser(UnknownEpisodeValidator validator) : base(validator)
+        public UnknownEpisodeParser(IUnknownEpisodeValidator validator) : base(validator)
         {
         }
 
-        protected override Result<UnknownEpisode> ParseInternal(HtmlNode input)
+        protected override Result<Episode> ParseInternal(HtmlNode input)
         {
             var rawTitle = input.SelectSingleNode("./td[1]").InnerText;
             var unknownEpisode = new UnknownEpisode(rawTitle);

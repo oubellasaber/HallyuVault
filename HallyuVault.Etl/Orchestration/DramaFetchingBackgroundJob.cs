@@ -2,7 +2,6 @@
 using HallyuVault.Etl.Infra;
 using HallyuVault.Etl.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using Quartz;
 using System.Threading.Tasks.Dataflow;
 

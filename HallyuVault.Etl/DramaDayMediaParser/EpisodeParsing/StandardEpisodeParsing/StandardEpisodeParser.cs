@@ -5,13 +5,13 @@ using HtmlAgilityPack;
 
 namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing.StandardEpisodeParsing
 {
-    public class StandardEpisodeParser : HtmlNodeParser<StandardEpisode>, ISpecializedEpisodeParser<StandardEpisode>
+    public class StandardEpisodeParser : HtmlNodeParser<Episode>
     {
         public StandardEpisodeParser(IStandardEpisodeValidator validator) : base(validator)
         {
         }
 
-        protected override Result<StandardEpisode> ParseInternal(HtmlNode input)
+        protected override Result<Episode> ParseInternal(HtmlNode input)
         {
             var episodeNumber = int.Parse(
                     input.SelectSingleNode("./td[1]")

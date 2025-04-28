@@ -33,10 +33,12 @@ host.Services.AddTransient<IBatchEpisodeValidator, BatchEpisodeValidator>();
 host.Services.AddTransient<ISpecialEpisodeValidator, SpecialEpisodeValidator>();
 host.Services.AddTransient<IUnknownEpisodeValidator, UnknownEpisodeValidator>();
 
-host.Services.AddTransient<ISpecializedEpisodeParser<StandardEpisode>, StandardEpisodeParser>();
-host.Services.AddTransient<ISpecializedEpisodeParser<SpecialEpisode>, SpecialEpisodeParser>();
-host.Services.AddTransient<ISpecializedEpisodeParser<BatchEpisode>, BatchEpisodeParser>();
-host.Services.AddTransient<ISpecializedEpisodeParser<UnknownEpisode>, UnknownEpisodeParser>();
+host.Services.AddTransient<StandardEpisodeParser>();
+host.Services.AddTransient<SpecialEpisodeParser>();
+host.Services.AddTransient<BatchEpisodeParser>();
+host.Services.AddTransient<UnknownEpisodeParser>();
+
+
 
 host.Services.AddTransient<IHtmlNodeParser<Episode>, EpisodeParser>();
 
@@ -82,7 +84,7 @@ var response = await client.GetAsync("https://dramaday.me/for-eagle-brothers/");
 var html = await response.Content.ReadAsStringAsync();
 HtmlDocument htmlDocument = new();
 htmlDocument.LoadHtml(html);
-mediaParser.Parse(htmlDocument.DocumentNode);
+var media = mediaParser.Parse(htmlDocument.DocumentNode);
 
 
 // Build

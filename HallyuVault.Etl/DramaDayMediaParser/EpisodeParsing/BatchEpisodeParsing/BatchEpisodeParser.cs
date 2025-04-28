@@ -1,19 +1,18 @@
 ﻿using HallyuVault.Core.Abstractions;
 using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
-using HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing;
 using HallyuVault.Etl.Models;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
 
 namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing.BatchEpisodeParsing
 {
-    public class BatchEpisodeParser : HtmlNodeParser<BatchEpisode>, ISpecializedEpisodeParser<BatchEpisode>
+    public class BatchEpisodeParser : HtmlNodeParser<Episode>
     {
         public BatchEpisodeParser(IBatchEpisodeValidator validator) : base(validator)
         {
         }
 
-        protected override Result<BatchEpisode> ParseInternal(HtmlNode input)
+        protected override Result<Episode> ParseInternal(HtmlNode input)
         {
             Regex rangedEpisodesReg = new Regex(@"(\d{1,2})-(\d{1,2})");
             var rangedEps = rangedEpisodesReg.Matches(input.SelectSingleNode("./td[1]").InnerText);

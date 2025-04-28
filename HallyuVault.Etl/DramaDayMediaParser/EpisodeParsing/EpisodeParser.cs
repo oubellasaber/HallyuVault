@@ -1,5 +1,9 @@
 ﻿using HallyuVault.Core.Abstractions;
 using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
+using HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing.BatchEpisodeParsing;
+using HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing.SpecialEpisodeParsing;
+using HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing.StandardEpisodeParsing;
+using HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing.UnknownEpisodeParsing;
 using HallyuVault.Etl.Models;
 using HtmlAgilityPack;
 
@@ -11,13 +15,20 @@ namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing
         private readonly IHtmlNodeParser<List<EpisodeVersion>> _episodeVersionsParser;
 
         public EpisodeParser(
-            ISpecializedEpisodeParser<StandardEpisode> standardEpisodeParser,
-            ISpecializedEpisodeParser<SpecialEpisode> specializedEpisodeParser,
-            ISpecializedEpisodeParser<BatchEpisode> batchEpisodeParser,
-            ISpecializedEpisodeParser<UnknownEpisode> unknownEpisodeParser,
-            IHtmlNodeParser<List<EpisodeVersion>> episodeVersionsParser) 
+        StandardEpisodeParser standardEpisodeParser,
+        SpecialEpisodeParser specialEpisodeParser,
+        BatchEpisodeParser batchEpisodeParser,
+        UnknownEpisodeParser unknownEpisodeParser,
+        IHtmlNodeParser<List<EpisodeVersion>> episodeVersionsParser)
         {
-            _parsers = new List<IHtmlNodeParser<Episode>>() {  };
+            _parsers = new List<IHtmlNodeParser<Episode>>
+            {
+                standardEpisodeParser,
+                specialEpisodeParser,
+                batchEpisodeParser,
+                unknownEpisodeParser
+            };
+
             _episodeVersionsParser = episodeVersionsParser;
         }
 

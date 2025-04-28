@@ -1,7 +1,6 @@
-﻿using System.Text.Json;
+﻿using HallyuVault.Etl.Models;
+using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Web;
-using HallyuVault.Etl.Models;
 
 namespace HallyuVault.Etl.Fetcher
 {
@@ -18,7 +17,6 @@ namespace HallyuVault.Etl.Fetcher
                 {
                     DramaId = GetRequiredInt(root, "id"),
                     RenderedTitle = GetRequiredString(root, "title", "rendered"),
-                    RenderedHtml = GetRequiredString(root, "content", "rendered"),
                     Slug = GetRequiredString(root, "slug"),
                     AddedOnUtc = GetRequiredDateTime(root, "date_gmt"),
                     UpdatedOnUtc = GetRequiredDateTime(root, "modified_gmt")
@@ -43,7 +41,6 @@ namespace HallyuVault.Etl.Fetcher
             writer.WriteString("date_gmt", value.AddedOnUtc.ToString("o"));
             writer.WriteString("modified_gmt", value.UpdatedOnUtc.ToString("o"));
             writer.WriteStartObject("content");
-            writer.WriteString("rendered_html", value.RenderedHtml);
             writer.WriteEndObject();
         }
 
