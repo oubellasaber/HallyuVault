@@ -1,8 +1,7 @@
 ﻿using HallyuVault.Core.Abstractions;
 using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
-using HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing;
-using HallyuVault.Etl.DramaDayMediaParser.MediaVersionParsing;
 using HallyuVault.Etl.DramaDayMediaParser.SeasonParsing;
+using HallyuVault.Etl.Models;
 using HtmlAgilityPack;
 
 namespace HallyuVault.Etl.DramaDayMediaParser
@@ -15,13 +14,11 @@ namespace HallyuVault.Etl.DramaDayMediaParser
         private readonly IHtmlNodeParser<Episode> _episodeParser;
 
         public MediaParser(
-            IHtmlNodeValidator validator,
             IHtmlNodeParser<MediaInformation> mediaInformationParser,
             IHtmlNodeParser<Season> seasonParser,
             IHtmlNodeParser<MediaVersion> mediaVersionParser,
             IHtmlNodeParser<Episode> episodeParser
-            ) :
-            base(validator)
+            )
         {
             _mediaInformationParser = mediaInformationParser;
             _seasonParser = seasonParser;

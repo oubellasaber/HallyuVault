@@ -3,19 +3,22 @@
 
     public abstract class Parser<TInput, TOutput> : IParser<TInput, TOutput>
     {
-        protected readonly IValidator<TInput> Validator;
+        protected readonly IValidator<TInput>? Validator;
 
-        protected Parser(IValidator<TInput> validator)
+        protected Parser(IValidator<TInput>? validator = null)
         {
             Validator = validator;
         }
 
         public Result<TOutput> Parse(TInput input)
         {
-            var validationResult = Validator.Validate(input);
-            if (validationResult.IsFailure)
+            if (Validator is not null)
             {
-                return Result.Failure<TOutput>(validationResult.Error);
+                var validationResult = Validator.Validate(input);
+                if (validationResult.IsFailure)
+                {
+                    return Result.Failure<TOutput>(validationResult.Error);
+                }
             }
 
             return ParseInternal(input);

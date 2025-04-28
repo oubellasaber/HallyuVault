@@ -1,7 +1,9 @@
-﻿namespace HallyuVault.Etl.Fetcher
+﻿using HallyuVault.Etl.Models;
+
+namespace HallyuVault.Etl.Fetcher
 {
     public interface IDramaDayApiClient
     {
-        Task<IEnumerable<DramaPost>> GetDramas(DateTime? modifiedAfter);
+        Task<IEnumerable<ScrapedDrama>> GetDramas(DateTime? modifiedAfter);
     }
 }

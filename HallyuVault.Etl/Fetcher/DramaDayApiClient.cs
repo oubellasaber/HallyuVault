@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using HallyuVault.Etl.Models;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace HallyuVault.Etl.Fetcher
@@ -15,7 +16,7 @@ namespace HallyuVault.Etl.Fetcher
             _fetchingOptions = fetchingOptions.Value;
         }
 
-        public async Task<IEnumerable<DramaPost>> GetDramas(DateTime? modifiedAfter)
+        public async Task<IEnumerable<ScrapedDrama>> GetDramas(DateTime? modifiedAfter)
         {
             var modifiedAfterExclusive = modifiedAfter?.AddSeconds(1);
 
@@ -46,7 +47,7 @@ namespace HallyuVault.Etl.Fetcher
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new DramaPostConverter());
-            var dramas = JsonSerializer.Deserialize<List<DramaPost>>(jsonContent, options) ?? [];
+            var dramas = JsonSerializer.Deserialize<List<ScrapedDrama>>(jsonContent, options) ?? [];
 
             dramas.ForEach(x => x.PulledOn = pulledOnUtc);
 

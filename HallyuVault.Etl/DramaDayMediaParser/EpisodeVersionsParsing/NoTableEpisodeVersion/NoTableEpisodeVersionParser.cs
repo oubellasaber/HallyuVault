@@ -1,4 +1,4 @@
-﻿using HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing;
+﻿using HallyuVault.Etl.Models;
 using HtmlAgilityPack;
 
 namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeVersionsParsing.NoTableEpisodeVersion

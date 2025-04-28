@@ -11,8 +11,4 @@
     <ProjectReference Include="..\HallyuVault.Core\HallyuVault.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Orchestration\" />
-  </ItemGroup>
-
 </Project>

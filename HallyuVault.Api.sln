@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HallyuVault.Core", "HallyuV
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HallyuVault.Console", "HallyuVault.Console\HallyuVault.Console.csproj", "{A9219301-9B95-4A80-BBFA-C56297111D07}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HallyuVault.Etl", "HallyuVault.Etl\HallyuVault.Etl.csproj", "{BE91EDE8-9178-4881-B604-684C64737DAF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HallyuVault.Etl", "HallyuVault.Etl\HallyuVault.Etl.csproj", "{BE91EDE8-9178-4881-B604-684C64737DAF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

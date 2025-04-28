@@ -37,9 +37,9 @@ namespace HallyuVault.Etl.DramaDayMediaParser.ChangeDetection
 
                     foreach (var newEpisode in newEpisodes)
                     {
-                        var newEpisodeVersions = newEpisode.Versions.Where(newVersion =>
+                        var newEpisodeVersions = newEpisode.EpisodeVersions.Where(newVersion =>
                             oldSeason.MediaVersions.SelectMany(m => m.Episodes)
-                                .SelectMany(e => e.Versions)
+                                .SelectMany(e => e.EpisodeVersions)
                                 .All(oldVersion => oldVersion.Name != newVersion.Name)).ToList();
 
                         if (!newEpisodeVersions.Any())
@@ -49,7 +49,7 @@ namespace HallyuVault.Etl.DramaDayMediaParser.ChangeDetection
                         {
                             var newLinks = newVersion.Links.Where(newLink =>
                                 oldSeason.MediaVersions.SelectMany(m => m.Episodes)
-                                    .SelectMany(e => e.Versions)
+                                    .SelectMany(e => e.EpisodeVersions)
                                     .SelectMany(v => v.Links)
                                     .All(oldLink => oldLink.Url != newLink.Url)).ToList();
 

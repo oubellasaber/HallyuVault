@@ -10,7 +10,7 @@
             _client = client;
         }
 
-        public RequestBuilder ForUrl(string url)
+        public RequestBuilder ForUrl(Uri url)
         {
             _options.Url = url;
             return this;
@@ -30,9 +30,14 @@
 
         // Additional builder methods...
 
-        public Task<HttpResponseMessage> GetHtmlAsync()
+        public Task<HttpResponseMessage> GetAsync()
         {
-            return _client.GetHtmlAsync(_options);
+            return _client.GetAsync(_options);
+        }
+
+        public Task<HttpResponseMessage> PostAsync(StringContent content)
+        {
+            return _client.PostAsync(_options, content);
         }
     }
 }

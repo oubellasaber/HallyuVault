@@ -1,4 +1,5 @@
 ﻿using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
+using HallyuVault.Etl.Models;
 
 namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing
 {

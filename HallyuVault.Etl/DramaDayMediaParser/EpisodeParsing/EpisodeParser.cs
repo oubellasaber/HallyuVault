@@ -1,6 +1,6 @@
 ﻿using HallyuVault.Core.Abstractions;
 using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
-using HallyuVault.Etl.DramaDayMediaParser.EpisodeVersionsParsing;
+using HallyuVault.Etl.Models;
 using HtmlAgilityPack;
 
 namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing
@@ -11,12 +11,13 @@ namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing
         private readonly IHtmlNodeParser<List<EpisodeVersion>> _episodeVersionsParser;
 
         public EpisodeParser(
-            IHtmlNodeValidator validator,
-            IEnumerable<IHtmlNodeParser<Episode>> parsers,
-            IHtmlNodeParser<List<EpisodeVersion>> episodeVersionsParser) :
-            base(validator)
+            ISpecializedEpisodeParser<StandardEpisode> standardEpisodeParser,
+            ISpecializedEpisodeParser<SpecialEpisode> specializedEpisodeParser,
+            ISpecializedEpisodeParser<BatchEpisode> batchEpisodeParser,
+            ISpecializedEpisodeParser<UnknownEpisode> unknownEpisodeParser,
+            IHtmlNodeParser<List<EpisodeVersion>> episodeVersionsParser) 
         {
-            _parsers = parsers;
+            _parsers = new List<IHtmlNodeParser<Episode>>() {  };
             _episodeVersionsParser = episodeVersionsParser;
         }
 

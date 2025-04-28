@@ -1,6 +1,6 @@
 ﻿using HallyuVault.Core.Abstractions;
 using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
-using HallyuVault.Etl.DramaDayMediaParser.MediaVersionParsing;
+using HallyuVault.Etl.Models;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
 

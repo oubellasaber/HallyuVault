@@ -13,11 +13,18 @@ namespace HallyuVault.Etl.ScraperApiClient
             _options = options;
         }
 
-        public async Task<HttpResponseMessage> GetHtmlAsync(RequestParameters parameters)
+        public async Task<HttpResponseMessage> GetAsync(RequestParameters parameters)
         {
             var requestUrl = BuildRequestUrl(parameters);
             var response = await _httpClient.GetAsync(requestUrl);
 
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> PostAsync(RequestParameters parameters, StringContent content)
+        {
+            var requestUrl = BuildRequestUrl(parameters);
+            var response = await _httpClient.PostAsync(requestUrl, content);
             return response;
         }
 
@@ -33,8 +40,9 @@ namespace HallyuVault.Etl.ScraperApiClient
                 ["api_key"] = parameters.ApiKey
             };
 
-            if (!string.IsNullOrEmpty(parameters.Url))
-                queryParams["url"] = parameters.Url;
+            var url = parameters.Url.ToString();
+            if (!string.IsNullOrEmpty(url))
+                queryParams["url"] = url;
 
             if (parameters.RenderJavaScript)
                 queryParams["render"] = "true";

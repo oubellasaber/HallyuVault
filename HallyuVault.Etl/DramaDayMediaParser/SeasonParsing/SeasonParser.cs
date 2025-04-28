@@ -1,7 +1,5 @@
 ﻿using HallyuVault.Core.Abstractions;
 using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
-using HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing;
-using HallyuVault.Etl.DramaDayMediaParser.EpisodeVersionsParsing;
 using HtmlAgilityPack;
 
 namespace HallyuVault.Etl.DramaDayMediaParser.SeasonParsing
@@ -10,10 +8,7 @@ namespace HallyuVault.Etl.DramaDayMediaParser.SeasonParsing
     {
         private readonly IEnumerable<IHtmlNodeParser<Season>> _parsers;
 
-        public SeasonParser(
-            IHtmlNodeValidator validator,
-            IEnumerable<IHtmlNodeParser<Season>> parsers) :
-            base(validator)
+        public SeasonParser(IEnumerable<IHtmlNodeParser<Season>> parsers)
         {
             _parsers = parsers;
         }

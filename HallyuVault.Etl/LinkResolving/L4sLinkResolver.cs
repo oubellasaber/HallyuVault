@@ -1,11 +1,10 @@
 ﻿using HallyuVault.Core.Abstractions;
-using System.IO;
 using System.Text;
 using System.Web;
 
 namespace HallyuVault.Etl.LinkResolving
 {
-    public class L4sLinkResolver : ILinkResolver
+    public class L4sLinkResolver : ISpecializedLinkResolver
     {
         private readonly HttpClient _client;
 
@@ -15,7 +14,7 @@ namespace HallyuVault.Etl.LinkResolving
         }
 
 
-        public async Task<Result<string>> Resolve(string link)
+        public async Task<Result<string>> ResolveAsync(string link)
         {
             // Get the first redirect
             var response = await _client.GetAsync(link);
@@ -91,7 +90,7 @@ namespace HallyuVault.Etl.LinkResolving
             }
 
             var directLink = Base64String.Parse(encodedUrl).Value;
-            
+
             return directLink;
         }
     }

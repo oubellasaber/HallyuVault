@@ -15,7 +15,7 @@ namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
             _scraperApiClient = scraperApiClient;
         }
 
-        public async Task<HttpResponseMessage> RequestAsync(RequestParameters parameters)
+        public async Task<HttpResponseMessage> GetAsync(RequestParameters parameters)
         {
             int estimatedCost = _scraperApiClient.GetEstimatedCreditCost(parameters);
             var apiKeyResult = _scraperApiKeyManager.Get(estimatedCost);
@@ -27,7 +27,31 @@ namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
 
             var apiKey = apiKeyResult.Value;
 
-            var response = await _scraperApiClient.GetHtmlAsync(parameters);
+            var response = await _scraperApiClient.GetAsync(parameters);
+            var actualCost = _scraperApiClient.GetCostFromResponse(response);
+
+            if (response.IsSuccessStatusCode)
+                apiKey.UpdateConsumedCredits(estimatedCost, actualCost);
+            else
+                apiKey.UpdateConsumedCredits(-estimatedCost);
+
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> PostAsync(RequestParameters parameters, StringContent content)
+        {
+            int estimatedCost = _scraperApiClient.GetEstimatedCreditCost(parameters);
+            var apiKeyResult = _scraperApiKeyManager.Get(estimatedCost);
+
+            if (apiKeyResult.IsFailure)
+            {
+                throw new Exception("No usable API apiKeyResult found.");
+            }
+
+            var apiKey = apiKeyResult.Value;
+            parameters.ApiKey = apiKey.Key;
+
+            var response = await _scraperApiClient.PostAsync(parameters, content);
             var actualCost = _scraperApiClient.GetCostFromResponse(response);
 
             if (response.IsSuccessStatusCode)

@@ -1,6 +1,5 @@
 ﻿using HallyuVault.Core.Abstractions;
 using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
-using HallyuVault.Etl.DramaDayMediaParser.SeasonParsing;
 using HtmlAgilityPack;
 
 namespace HallyuVault.Etl.DramaDayMediaParser.SeasonParsing.UrlSeason

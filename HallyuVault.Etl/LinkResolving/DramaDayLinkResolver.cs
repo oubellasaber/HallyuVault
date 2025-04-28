@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace HallyuVault.Etl.LinkResolving
 {
     // https://claude.ai/chat/eb3afb5f-1fde-4e92-8dc2-02ccea966d5b
-    public class DramaDayLinkResolver : ILinkResolver
+    public class DramaDayLinkResolver : ISpecializedLinkResolver
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
@@ -14,7 +14,7 @@ namespace HallyuVault.Etl.LinkResolving
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<Result<string>> Resolve(string link)
+        public async Task<Result<string>> ResolveAsync(string link)
         {
             // Get the html content of the first redirect using the default httpclient
             var httpClient = _httpClientFactory.CreateClient();

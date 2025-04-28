@@ -5,7 +5,7 @@ namespace HallyuVault.Etl.DramaDayMediaParser.Abtractions
 {
     public abstract class HtmlNodeParser<T> : Parser<HtmlNode, T>, IHtmlNodeParser<T>
     {
-        protected HtmlNodeParser(IHtmlNodeValidator validator) : base(validator)
+        protected HtmlNodeParser(IHtmlNodeValidator? validator = null) : base(validator)
         {
         }
     }

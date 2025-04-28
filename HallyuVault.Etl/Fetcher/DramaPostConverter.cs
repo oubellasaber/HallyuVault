@@ -1,19 +1,20 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
+using HallyuVault.Etl.Models;
 
 namespace HallyuVault.Etl.Fetcher
 {
-    public class DramaPostConverter : JsonConverter<DramaPost>
+    public class DramaPostConverter : JsonConverter<ScrapedDrama>
     {
-        public override DramaPost Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override ScrapedDrama Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             using var doc = JsonDocument.ParseValue(ref reader);
             var root = doc.RootElement;
 
             try
             {
-                var dramaPost = new DramaPost
+                var dramaPost = new ScrapedDrama
                 {
                     DramaId = GetRequiredInt(root, "id"),
                     RenderedTitle = GetRequiredString(root, "title", "rendered"),
@@ -27,11 +28,11 @@ namespace HallyuVault.Etl.Fetcher
             }
             catch (Exception ex)
             {
-                throw new JsonException("Failed to deserialize DramaPost: " + ex.Message, ex);
+                throw new JsonException("Failed to deserialize ScrapedDrama: " + ex.Message, ex);
             }
         }
 
-        public override void Write(Utf8JsonWriter writer, DramaPost value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, ScrapedDrama value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
             writer.WriteNumber("id", value.DramaId);
