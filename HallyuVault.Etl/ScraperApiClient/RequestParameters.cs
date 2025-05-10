@@ -9,7 +9,6 @@
 
         public RequestParameters()
         {
-
         }
 
         public RequestParameters(string apiKey, Uri url, bool renderJavaScript, bool premium)

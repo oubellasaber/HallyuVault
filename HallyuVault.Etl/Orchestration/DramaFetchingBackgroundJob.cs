@@ -1,35 +1,34 @@
 ﻿using HallyuVault.Etl.Fetcher;
 using HallyuVault.Etl.Infra;
-using HallyuVault.Etl.Models;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using System.Threading.Tasks.Dataflow;
 
 namespace HallyuVault.Etl.Orchestration
 {
     [DisallowConcurrentExecution]
     public class DramaFetchingBackgroundJob : IJob
     {
-        private readonly DatabaseContext _ctx;
+        private readonly EtlContext _ctx;
         private readonly IDramaDayApiClient _dramaDayApiClient;
-        private readonly ITargetBlock<ScrapedDrama> _queue;
+        private readonly EtlOrchestrator _orchestrator;
 
         public DramaFetchingBackgroundJob(
-            DatabaseContext ctx,
+            EtlContext ctx,
             IDramaDayApiClient dramaDayApiClient,
-            ITargetBlock<ScrapedDrama> queue)
+            EtlOrchestrator orchestrator)
         {
             _ctx = ctx;
             _dramaDayApiClient = dramaDayApiClient;
-            _queue = queue;
+            _orchestrator = orchestrator;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
             DateTime? lastFetchedDramaPostUpdateDatetime = await _ctx.ScrapedDramas
-                .Select(x => x.UpdatedOnUtc)
-                .OrderByDescending(x => x)
+                .OrderByDescending(x => x.UpdatedOn)
+                .Select(x => (DateTime?)x.UpdatedOn)
                 .FirstOrDefaultAsync();
+
 
             var posts = await _dramaDayApiClient.GetDramas(lastFetchedDramaPostUpdateDatetime);
 
@@ -37,10 +36,8 @@ namespace HallyuVault.Etl.Orchestration
 
             foreach (var post in posts)
             {
-                await _queue.SendAsync(post);
+                await _orchestrator.RunPipeline(post);
             }
-
-            // update the database with the last fetched post
         }
     }
 }

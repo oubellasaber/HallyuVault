@@ -1,6 +1,4 @@
-﻿using HallyuVault.Etl.Models;
-
-namespace HallyuVault.Etl.DramaDayMediaParser.SeasonParsing
+﻿namespace HallyuVault.Etl.Models
 {
     public class Season
     {
@@ -11,7 +9,7 @@ namespace HallyuVault.Etl.DramaDayMediaParser.SeasonParsing
             SeasonNumber = seasonNumber;
         }
 
-        public int Id { get; private set; }
+        public int Id { get; set; }
         public int? SeasonNumber { get; private set; }
         public IReadOnlyCollection<MediaVersion> MediaVersions => _mediaVersions.AsReadOnly();
 

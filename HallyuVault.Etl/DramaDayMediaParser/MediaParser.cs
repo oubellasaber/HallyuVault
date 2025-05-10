@@ -1,6 +1,5 @@
 ﻿using HallyuVault.Core.Abstractions;
 using HallyuVault.Etl.DramaDayMediaParser.Abtractions;
-using HallyuVault.Etl.DramaDayMediaParser.SeasonParsing;
 using HallyuVault.Etl.Models;
 using HtmlAgilityPack;
 
@@ -111,6 +110,6 @@ namespace HallyuVault.Etl.DramaDayMediaParser
             }
 
             rows.RemoveAll(r => r.IsEmptyRow() || r.IsPasswordRow());
-        }
     }
+        }
 }

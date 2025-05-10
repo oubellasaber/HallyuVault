@@ -1,0 +1,6 @@
+do migrations
+test new ranged pipeline
+
+// We should support chnage for ranged - api should be ready first
+
+Start learnign more about apis - frontend

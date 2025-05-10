@@ -3,8 +3,8 @@ using HallyuVault.Etl.ApiKeyRotator.Core;
 
 namespace HallyuVault.Etl.ApiKeyRotator.Abstractions
 {
-    public interface IApiKeyFactory<T> where T : ApiKey
+    public interface IApiKeyFactory<TKey> where TKey : ApiKey
     {
-        ValueTask<Result<T>> CreateAsync(string apiKey);
+        ValueTask<TKey> CreateAsync(string apiKey);
     }
 }

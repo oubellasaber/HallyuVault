@@ -1,5 +1,4 @@
-﻿using HallyuVault.Etl.DramaDayMediaParser.SeasonParsing;
-using HallyuVault.Etl.Models;
+﻿using HallyuVault.Etl.Models;
 using System.Diagnostics;
 
 namespace HallyuVault.Etl.Orchestration
@@ -11,6 +10,27 @@ namespace HallyuVault.Etl.Orchestration
         Special
     }
 
+    public class LinkPair
+    {
+        public DramaDayLink RawLink { get; private set; }
+        public ResolvedLink? ResolvedLink { get; private set; }
+        public bool IsResolved => ResolvedLink != null;
+
+        public LinkPair(DramaDayLink rawLink)
+        {
+            RawLink = rawLink;
+        }
+
+        public void SetResolvedLink(ResolvedLink resolvedLink)
+        {
+            if (ResolvedLink is null)
+            {
+                ResolvedLink = resolvedLink;
+            }
+        }
+    }
+
+
     public class ResolvableEpisode
     {
         public int SeasonNumber { get; }
@@ -18,7 +38,7 @@ namespace HallyuVault.Etl.Orchestration
         public EpisodeType Type { get; }
         public Range? EpisodeRange { get; }
         public string EpisodeVersionName { get; }
-        public IEnumerable<(DramaDayLink RawLink, ResolvedLink? ResolvedLink)> Links { get; }
+        public IEnumerable<LinkPair> Links { get; }
 
         public ResolvableEpisode(
             int seasonNumber,
@@ -26,7 +46,7 @@ namespace HallyuVault.Etl.Orchestration
             EpisodeType type,
             Range? episodeRange,
             string episodeVersionName,
-            IEnumerable<(DramaDayLink, ResolvedLink?)> links)
+            IEnumerable<LinkPair> links)
         {
             SeasonNumber = seasonNumber;
             MediaVersionName = mediaVersionName;
@@ -45,7 +65,7 @@ namespace HallyuVault.Etl.Orchestration
             (EpisodeType, Range?) episodeInfo = episode switch
             {
                 StandardEpisode standardEpisode => (EpisodeType.Standard, new Range(standardEpisode.EpisodeNumber, standardEpisode.EpisodeNumber)),
-                BatchEpisode batchEpisode => (EpisodeType.Ranged, batchEpisode.EpisodeRange),
+                BatchEpisode batchEpisode => (EpisodeType.Ranged, new Range(batchEpisode.EpisodeStart, batchEpisode.EpisodeEnd)),
                 SpecialEpisode specialEpisode => (EpisodeType.Special, null),
                 _ => throw new UnreachableException($"Unknown episode type: {episode.GetType().Name}.")
             };
@@ -55,8 +75,7 @@ namespace HallyuVault.Etl.Orchestration
             SeasonNumber = season.SeasonNumber ?? 1;
             MediaVersionName = mediaVersion.Name;
             EpisodeVersionName = episodeVersion.Name;
-            Links = episodeVersion.Links.Select<DramaDayLink, (DramaDayLink, ResolvedLink?)>(link => (link, null));
-
+            Links = episodeVersion.Links.Select(link => new LinkPair(link)).ToList();
         }
     }
 }

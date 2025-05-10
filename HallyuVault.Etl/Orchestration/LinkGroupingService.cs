@@ -1,37 +1,38 @@
 ﻿using HallyuVault.Etl.FileCryptExtractor.Entities.Rows;
 using HallyuVault.Etl.FileCryptExtractor.Entities.Rows.Enums;
+using HallyuVault.Etl.Models;
 
-namespace HallyuVault.Etl.FileCryptExtractor.DomainServices
+namespace HallyuVault.Etl.Orchestration
 {
     public class LinkGroupingService
     {
         // Group Links
-        public static Dictionary<string, List<Row>> GroupLinks(List<Row> rows)
+        public static Dictionary<string, List<FileCryptLink>> GroupLinks(List<FileCryptLink> links)
         {
             // Step 1: Filter active links
-            var activeLinks = rows
-                .Where(row =>
-                    !(row.Link.Status == Status.Offline && row.FileName == null) &&
-                    !(row.Link.Status == Status.Unknown && row.Link.Url.Host != "dddrive.me")
+            var activeLinks = links
+                .Where(link =>
+                    !(link.Status == Status.Offline && link.FileName == null) &&
+                    !(link.Status == Status.Unknown && new Uri(link.ContainerScrapedLink.ScrapedLink).Host != "dddrive.me")
                 )
                 .ToList();
 
             var activeNamedLinks = activeLinks
-                .Where(row => row.FileName != null)
+                .Where(link => link.FileName != null)
                 .Select(x => x.FileName!)
                 .Distinct()
                 .ToList();
 
             // Step 2: Group by filename into a mutable dictionary
-            var groupedByFilename = new Dictionary<string, List<Row>>();
-            var unnamedLinks = new List<Row>();
+            var groupedByFilename = new Dictionary<string, List<FileCryptLink>>();
+            var unnamedLinks = new List<FileCryptLink>();
 
             foreach (var row in activeLinks)
             {
                 if (row.FileName != null)
                 {
                     if (!groupedByFilename.ContainsKey(row.FileName))
-                        groupedByFilename[row.FileName] = new List<Row>();
+                        groupedByFilename[row.FileName] = new List<FileCryptLink>();
 
                     groupedByFilename[row.FileName].Add(row);
                 }
@@ -45,7 +46,7 @@ namespace HallyuVault.Etl.FileCryptExtractor.DomainServices
 
             // Step 3: Group unnamed links by host
             var unnamedLinksGroupedByHost = unnamedLinks
-                .GroupBy(row => row.Link.Url.Host)
+                .GroupBy(link => new Uri(link.ContainerScrapedLink.ScrapedLink).Host)
                 .ToList();
 
             // Step 4: Match unnamed groups to named groups by count

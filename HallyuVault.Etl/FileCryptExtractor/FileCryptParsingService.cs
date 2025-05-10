@@ -1,4 +1,5 @@
 ﻿using HallyuVault.Core.Abstractions;
+using HallyuVault.Etl.ApiKeyRotator.ScraperApi;
 using HallyuVault.Etl.FileCryptExtractor.DomainServices;
 using HallyuVault.Etl.FileCryptExtractor.Entities.FileCryptContainer;
 using HallyuVault.Etl.FileCryptExtractor.Entities.FileCryptHeader;
@@ -11,23 +12,21 @@ namespace HallyuVault.Etl.FileCryptExtractor;
 public class FileCryptParsingService
 {
     private readonly HttpClient _httpClient;
-    private readonly ScraperApiClient.ScraperApiClient _scraperApiClient;
+    private readonly ScraperApiProxy _scraperApiProxy;
     private readonly RowParsingService _rowParsingService;
     private readonly FileCryptHeaderExtractionService _headerExtractionService;
     private readonly RequestBuilder _requestBuilder;
 
     public FileCryptParsingService(
-        IHttpClientFactory httpClientFactory,
-        ScraperApiClient.ScraperApiClient scraperApiClient,
+        HttpClient httpClient,
+        ScraperApiProxy scraperApiProxy,
         RowParsingService rowParsingService,
-        FileCryptHeaderExtractionService headerExtractionService,
-        RequestBuilder requestBuilder)
+        FileCryptHeaderExtractionService headerExtractionService)
     {
-        _httpClient = httpClientFactory.CreateClient("Default");
-        _scraperApiClient = scraperApiClient;
+        _httpClient = httpClient;
+        _scraperApiProxy = scraperApiProxy;
         _rowParsingService = rowParsingService;
         _headerExtractionService = headerExtractionService;
-        _requestBuilder = requestBuilder;
     }
 
     public async Task<Result<FileCryptContainer>> ParseAsync(Uri url, string? password = null)
@@ -43,58 +42,15 @@ public class FileCryptParsingService
         // Try again with ScraperApiClient if captcha was detected
         for (var i = 0; i < 3; i++)
         {
-            Console.WriteLine($"Try number {i + 1} for {url}");
-            var result = await TryScrapeWithScraperApiAsync(url, content);
+            if (i != 0)
+                Console.WriteLine($"Captcha Detected, Let's give it another try{i + 1} for {url}");
+
+            var response = await _scraperApiProxy.SendAsync(url, content);
+            var result = await ProcessResponse(url, response);
             if (result.IsSuccess) return result;
         }
 
         return Result.Failure<FileCryptContainer>(Error.CaptchaDetected);
-    }
-
-    private async Task<Result<FileCryptContainer>> TryScrapeWithHttpClientAsync(Uri url, StringContent? content)
-    {
-        HttpResponseMessage response;
-
-        if (content is null)
-        {
-            response = await _requestBuilder
-                .ForUrl(url)
-                .WithPremium()
-                .GetAsync();
-        }
-        else
-        {
-            response = await _requestBuilder
-                .ForUrl(url)
-                .WithPremium()
-                .PostAsync(content);
-        }
-
-        return await ProcessResponse(url, response);
-    }
-
-    private async Task<Result<FileCryptContainer>> TryScrapeWithScraperApiAsync(Uri url, StringContent? content)
-    {
-        HttpResponseMessage response;
-
-        if (content is null)
-        {
-            response = await _requestBuilder
-                .ForUrl(url)
-                .WithPremium()
-                .GetAsync();
-        }
-        else
-        {
-            response = await _requestBuilder
-                .ForUrl(url)
-                .WithPremium()
-                .PostAsync(content);
-        }
-
-
-        var parsingResult = await ProcessResponse(url, response);
-        return parsingResult;
     }
 
     private async Task<Result<FileCryptContainer>> ProcessResponse(Uri url, HttpResponseMessage response)

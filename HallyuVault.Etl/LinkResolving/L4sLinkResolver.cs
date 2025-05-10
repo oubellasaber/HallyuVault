@@ -16,6 +16,11 @@ namespace HallyuVault.Etl.LinkResolving
 
         public async Task<Result<string>> ResolveAsync(string link)
         {
+            if (!link.Contains("l4s."))
+            {
+                return Result.Failure<string>(LinkResolvingErrors.NotSupported);
+            }
+
             // Get the first redirect
             var response = await _client.GetAsync(link);
             string? location = response.Headers.Location?.ToString();
@@ -89,9 +94,9 @@ namespace HallyuVault.Etl.LinkResolving
                 );
             }
 
-            var directLink = Base64String.Parse(encodedUrl).Value;
-
-            return directLink;
+            return Base64String.TryParse(encodedUrl, out var base64String) ?
+                base64String.Value :
+                encodedUrl;
         }
     }
 }

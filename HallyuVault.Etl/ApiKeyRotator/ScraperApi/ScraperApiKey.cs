@@ -4,7 +4,7 @@ namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
 {
     public class ScraperApiKey : ApiKey
     {
-        private string _apiKey { get; }
+        private string _apiKey;
         public int TotalCredits { get; }
         public int ConsumedCredits { get; private set; }
         public int ConcurrencyLimit { get; }
@@ -34,7 +34,7 @@ namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
             --ConcurrentRequests;
         }
 
-        internal ScraperApiKey(
+        public ScraperApiKey(
             string apiKey,
             int totalCredits,
             int consumedCredits,

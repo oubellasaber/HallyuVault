@@ -1,6 +1,4 @@
-﻿using HallyuVault.Core.Abstractions;
-using HallyuVault.Etl.ApiKeyRotator.Abstractions;
-using HallyuVault.Etl.ApiKeyRotator.ScraperApi;
+﻿using HallyuVault.Etl.ApiKeyRotator.Abstractions;
 using System.Text.Json;
 
 namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
@@ -19,11 +17,14 @@ namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
             _httpClient = httpClient;
         }
 
-        public async ValueTask<Result<ScraperApiKey>> CreateAsync(string apiKey)
+        public async ValueTask<ScraperApiKey> CreateAsync(string apiKey)
         {
-            if (apiKey.Length != 32 || apiKey.All(c => char.IsAsciiHexDigit(c)))
+            if (apiKey is null)
+                throw new ArgumentNullException(nameof(apiKey));
+
+            if (apiKey.Length != 32 || !apiKey.All(c => char.IsAsciiHexDigit(c)))
             {
-                return Result.Failure<ScraperApiKey>(new Error("ScraperApiKey.InvalidFormat", "The submitted api key does not match the expected format"));
+                throw new ArgumentException("The submitted api key does not match the expected format", nameof(apiKey));
             }
 
             var apiKeyInfo = await GetApiKeyInfoAsync(apiKey);
@@ -31,13 +32,8 @@ namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
             return apiKeyInfo;
         }
 
-        private async Task<Result<ScraperApiKey>> GetApiKeyInfoAsync(string apiKey)
+        private async Task<ScraperApiKey> GetApiKeyInfoAsync(string apiKey)
         {
-            if (string.IsNullOrWhiteSpace(apiKey) || apiKey.Length != 32)
-            {
-                return Result.Failure<ScraperApiKey>(new Error("ScraperApi.InvalidKey", "API key format is invalid."));
-            }
-
             try
             {
                 var response = await _httpClient.GetAsync($"https://api.scraperapi.com/account?api_key={apiKey}");
@@ -54,11 +50,11 @@ namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
                 var subscriptionDate = root.GetProperty("subscriptionDate").GetDateTime();
 
                 var key = new ScraperApiKey(apiKey, total, used, limit, active, subscriptionDate);
-                return Result.Success(key);
+                return key;
             }
             catch (Exception ex)
             {
-                return Result.Failure<ScraperApiKey>(new Error("ScraperApi.Exception", ex.Message));
+                throw new Exception("Failed to retrieve API key information", ex);
             }
         }
     }

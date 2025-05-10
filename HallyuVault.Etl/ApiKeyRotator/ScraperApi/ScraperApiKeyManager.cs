@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
 {
-    public class ScraperApiKeyManager : ApiKeyManager<ScraperApiKey>
+    public class ScraperApiKeyManager : ApiKeyManager<ScraperApiKey, int>
     {
         public ScraperApiKeyManager(
             IApiKeyFactory<ScraperApiKey> apiKeyFactory,
@@ -13,7 +13,7 @@ namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
         {
         }
 
-        protected override ScraperApiKey SelectKey(int estimitedCredits)
+        protected override ScraperApiKey? SelectKey(int estimitedCredits)
         {
             var selectedKey = ApiKeys.Where(k => k.ConcurrentRequests < k.ConcurrencyLimit && k.AvailableCredits >= estimitedCredits)
                 .OrderByDescending(k => k.AvailableCredits)

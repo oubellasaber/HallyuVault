@@ -3,9 +3,9 @@ using HallyuVault.Etl.ApiKeyRotator.Core;
 
 namespace HallyuVault.Etl.ApiKeyRotator.Abstractions
 {
-    public interface IApiKeyManager<T> where T : ApiKey
+    public interface IApiKeyManager<TKey, TSelectionArg> where TKey : ApiKey
     {
-        Task<Result<T>> AddAsync(string apiKey);
-        Result<T> Get(int estimitedCredits);
+        Task<TKey> AddAsync(string apiKey);
+        TKey? Get(TSelectionArg key);
     }
 }

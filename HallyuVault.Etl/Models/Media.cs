@@ -1,5 +1,4 @@
 ﻿using HallyuVault.Etl.DramaDayMediaParser;
-using HallyuVault.Etl.DramaDayMediaParser.SeasonParsing;
 
 namespace HallyuVault.Etl.Models
 {
@@ -7,21 +6,23 @@ namespace HallyuVault.Etl.Models
     {
         private readonly List<Season> _seasons = new();
 
+        private Media() { }
+
         public Media(string id, string englishTitle, string? koreanTitle)
         {
-            Id = id;
+            MediaId = id;
             EnglishTitle = englishTitle;
             KoreanTitle = koreanTitle;
         }
 
         public Media(MediaInformation mediaInformation)
         {
-            Id = mediaInformation.DramaDayId;
+            MediaId = mediaInformation.DramaDayId;
             EnglishTitle = mediaInformation.EnglishTitle;
             KoreanTitle = mediaInformation.KoreanTitle;
         }
 
-        public string Id { get; private set; }
+        public string MediaId { get; private set; }
         public string EnglishTitle { get; set; }
         public string? KoreanTitle { get; set; }
         public IReadOnlyCollection<Season> Seasons => _seasons.AsReadOnly();

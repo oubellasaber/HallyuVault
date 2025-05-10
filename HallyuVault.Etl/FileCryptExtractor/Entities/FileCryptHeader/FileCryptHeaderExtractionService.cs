@@ -4,15 +4,11 @@ namespace HallyuVault.Etl.FileCryptExtractor.Entities.FileCryptHeader;
 
 public class FileCryptHeaderExtractionService
 {
-    private readonly FileCryptSettings _settings;
-    private readonly FileCryptHeaderConfig _config;
+    private readonly FileCryptOptions _settings;
 
-    public FileCryptHeaderExtractionService(
-        IOptions<FileCryptSettings> settings,
-        IOptions<FileCryptHeaderConfig> config)
+    public FileCryptHeaderExtractionService(IOptions<FileCryptOptions> settings)
     {
         _settings = settings.Value;
-        _config = config.Value;
     }
 
     public FileCryptHeader GetFileCryptHeader(HttpResponseMessage httpRequestMessage)
@@ -22,11 +18,7 @@ public class FileCryptHeaderExtractionService
         var headersSeperated = requiredHeaders.Split(';');
 
         var phpSessid = headersSeperated[0].Split('=')[1];
-        var expirationDate = headersSeperated[1].Split('=')[1];
 
-        return new FileCryptHeader(
-            phpSessid,
-            expirationDate,
-            _config);
+        return new FileCryptHeader(phpSessid);
     }
 }

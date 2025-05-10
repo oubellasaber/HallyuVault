@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace HallyuVault.Etl.ScraperApiClient
 {
@@ -7,110 +8,60 @@ namespace HallyuVault.Etl.ScraperApiClient
         private readonly HttpClient _httpClient;
         private readonly ScraperApiOptions _options;
 
-        public ScraperApiClient(HttpClient httpClient, ScraperApiOptions options)
+        public ScraperApiClient(HttpClient httpClient, IOptions<ScraperApiOptions> options)
         {
             _httpClient = httpClient;
-            _options = options;
+            _options = options.Value;
         }
 
-        public async Task<HttpResponseMessage> GetAsync(RequestParameters parameters)
+        public async Task<HttpResponseMessage> SendAsync(ScraperRequest request)
         {
-            var requestUrl = BuildRequestUrl(parameters);
-            var response = await _httpClient.GetAsync(requestUrl);
-
-            return response;
-        }
-
-        public async Task<HttpResponseMessage> PostAsync(RequestParameters parameters, StringContent content)
-        {
-            var requestUrl = BuildRequestUrl(parameters);
-            var response = await _httpClient.PostAsync(requestUrl, content);
-            return response;
-        }
-
-        private string BuildRequestUrl(RequestParameters parameters, string? endpoint = null)
-        {
-            if (endpoint == "account")
+            var httpRequest = new HttpRequestMessage(request.Method, request.Url)
             {
-                return $"{_options.BaseUrl}{_options.AccountEndpoint}?api_key={parameters.ApiKey}";
-            }
-
-            var queryParams = new Dictionary<string, string>
-            {
-                ["api_key"] = parameters.ApiKey
+                Content = request.Content
             };
 
-            var url = parameters.Url.ToString();
-            if (!string.IsNullOrEmpty(url))
-                queryParams["url"] = url;
+            foreach (var header in request.Headers)
+                httpRequest.Headers.Add(header.Key, header.Value);
 
-            if (parameters.RenderJavaScript)
-                queryParams["render"] = "true";
-
-            if (parameters.Premium)
-                queryParams["premium"] = "true";
-
-            var queryString = string.Join("&", queryParams.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
-            var path = string.IsNullOrEmpty(endpoint) ? "" : $"/{endpoint}";
-
-            return $"{path}?{queryString}";
+            return await _httpClient.SendAsync(httpRequest);
         }
 
-        public async Task<string> GetAccountInfoAsync()
+        public async Task<string> GetAccountInfoAsync(string apiKey)
         {
-            var requestUrl = BuildRequestUrl(null!, "account");
-            var response = await _httpClient.GetAsync(requestUrl);
-
+            var url = $"{_options.BaseUrl}{_options.AccountEndpoint}?api_key={apiKey}";
+            var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<int> GetActualCostFromApi(RequestParameters parameters)
+        public async Task<int> GetActualCostFromApi(string apiKey, Uri targetUrl)
         {
-            var targetRequestUrl = BuildRequestUrl(parameters);
-            var requestUrl = $"{_options.BaseUrl}{_options.UrlCostEndpoint}?url={targetRequestUrl}";
-
-            var response = await _httpClient.GetAsync(requestUrl);
+            var url = $"{_options.BaseUrl}{_options.UrlCostEndpoint}?url={Uri.EscapeDataString(targetUrl.ToString())}&api_key={apiKey}";
+            var response = await _httpClient.GetAsync(url);
             var content = await response.Content.ReadAsStringAsync();
 
-            using (JsonDocument document = JsonDocument.Parse(content))
-            {
-                if (document.RootElement.TryGetProperty("credits", out var creditsElement))
-                {
-                    return creditsElement.GetInt32();
-                }
-            }
-
-            return -1;
+            using var doc = JsonDocument.Parse(content);
+            return doc.RootElement.TryGetProperty("credits", out var credits) ? credits.GetInt32() : -1;
         }
 
         public int GetCostFromResponse(HttpResponseMessage response)
         {
-            if (response.Headers.TryGetValues("sa-credit-cost", out var values))
+            if (response.Headers.TryGetValues("sa-credit-cost", out var values) &&
+                int.TryParse(values.FirstOrDefault(), out var cost))
             {
-                if (int.TryParse(values.FirstOrDefault(), out var cost))
-                {
-                    return cost;
-                }
+                return cost;
             }
 
             return 0;
         }
 
-        public int GetEstimatedCreditCost(RequestParameters parameters)
+        public int EstimateCost(RequestParameters p)
         {
-            //if (parameters.ContainsKey("ultra_premium"))
-            //    cost = parameters.ContainsKey("render") ? 75 : 30;
+            if (p.Premium && p.RenderJavaScript) return 25;
             int cost = 1;
-
-            if (parameters.Premium && parameters.RenderJavaScript)
-                cost = 25;
-            else
-            {
-                if (parameters.Premium) cost += 10;
-                if (parameters.RenderJavaScript) cost += 10;
-            }
-
+            if (p.Premium) cost += 10;
+            if (p.RenderJavaScript) cost += 10;
             return cost;
         }
     }

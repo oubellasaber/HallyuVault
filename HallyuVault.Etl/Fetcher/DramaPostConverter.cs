@@ -15,10 +15,9 @@ namespace HallyuVault.Etl.Fetcher
             {
                 var dramaPost = new ScrapedDrama
                 {
-                    DramaId = GetRequiredInt(root, "id"),
-                    RenderedTitle = GetRequiredString(root, "title", "rendered"),
-                    Slug = GetRequiredString(root, "slug"),
+                    ScrapedDramaId = GetRequiredInt(root, "id"),
                     AddedOnUtc = GetRequiredDateTime(root, "date_gmt"),
+                    UpdatedOn = GetRequiredDateTime(root, "modified"),
                     UpdatedOnUtc = GetRequiredDateTime(root, "modified_gmt")
                 };
 
@@ -33,14 +32,11 @@ namespace HallyuVault.Etl.Fetcher
         public override void Write(Utf8JsonWriter writer, ScrapedDrama value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
-            writer.WriteNumber("id", value.DramaId);
-            writer.WriteStartObject("title");
-            writer.WriteString("rendered_title", value.RenderedTitle);
-            writer.WriteEndObject();
-            writer.WriteString("slug", value.Slug);
-            writer.WriteString("date_gmt", value.AddedOnUtc.ToString("o"));
-            writer.WriteString("modified_gmt", value.UpdatedOnUtc.ToString("o"));
-            writer.WriteStartObject("content");
+            writer.WriteNumber("id", value.ScrapedDramaId);
+            writer.WriteString("added_on_utc", value.AddedOnUtc.ToString("o"));
+            writer.WriteString("updated_on_utc", value.UpdatedOnUtc.ToString("o"));
+            writer.WriteString("updated_on", value.UpdatedOnUtc.ToString("o"));
+            writer.WriteString("pulled_on_utc", value.PulledOn.ToString("o"));
             writer.WriteEndObject();
         }
 

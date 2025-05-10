@@ -16,6 +16,11 @@ namespace HallyuVault.Etl.LinkResolving
 
         public async Task<Result<string>> ResolveAsync(string link)
         {
+            if (!link.Contains("dramaday"))
+            {
+                return Result.Failure<string>(LinkResolvingErrors.NotSupported);
+            }
+
             // Get the html content of the first redirect using the default httpclient
             var httpClient = _httpClientFactory.CreateClient();
             var reponse = await httpClient.GetAsync(link);

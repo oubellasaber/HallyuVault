@@ -1,4 +1,4 @@
-﻿using HallyuVault.Etl.DramaDayMediaParser.SeasonParsing;
+﻿using HallyuVault.Etl.Models;
 
 namespace HallyuVault.Etl.DramaDayMediaParser.ChangeDetection
 {

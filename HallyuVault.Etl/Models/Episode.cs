@@ -1,12 +1,12 @@
-﻿namespace HallyuVault.Etl.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace HallyuVault.Etl.Models
 {
-    public abstract class Episode
+    public class Episode
     {
         private readonly List<EpisodeVersion> _versions = new();
 
-        protected Episode() { }
-
-        public int Id { get; private set; }
+        public int Id { get; set; }
         public IReadOnlyCollection<EpisodeVersion> EpisodeVersions => _versions.AsReadOnly();
 
         public void AddEpisodeVersion(EpisodeVersion version)

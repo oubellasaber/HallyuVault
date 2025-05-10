@@ -84,7 +84,7 @@ namespace HallyuVault.Etl.DramaDayMediaParser
 
         public string? ParseKoreanTitle(HtmlNode node)
         {
-            var titleNode = node.SelectSingleNode("//div[@class='wpb_wrapper']/p[contains(text(), 'Filename')]");
+            var titleNode = node.SelectSingleNode("//div[@class='wpb_wrapper']/p[contains(text(), 'FileName')]");
             if (titleNode == null || string.IsNullOrWhiteSpace(titleNode.InnerText))
                 return null;
 

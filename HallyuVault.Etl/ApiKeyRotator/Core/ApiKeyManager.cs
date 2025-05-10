@@ -1,28 +1,27 @@
-﻿using HallyuVault.Core.Abstractions;
-using HallyuVault.Etl.ApiKeyRotator.Abstractions;
-using HallyuVault.Etl.ApiKeyRotator.ScraperApi;
+﻿using HallyuVault.Etl.ApiKeyRotator.Abstractions;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace HallyuVault.Etl.ApiKeyRotator.Core
 {
-    public abstract class ApiKeyManager<T> : IApiKeyManager<T> where T : ApiKey
+    public abstract class ApiKeyManager<TKey, TSelectionArg> : IApiKeyManager<TKey, TSelectionArg> where TKey : ApiKey
     {
-        private readonly IApiKeyFactory<T> _apiKeyFactory;
+        private readonly IApiKeyFactory<TKey> _apiKeyFactory;
         private readonly IOptionsMonitor<ApiKeyRotationOptions> _optionsMonitor;
-        private readonly ConcurrentDictionary<string, T> _apiKeys = new();
+        private readonly ConcurrentDictionary<string, TKey> _apiKeys = new();
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private bool _isInitialized;
 
-        public IReadOnlyCollection<T> ApiKeys => _apiKeys.Values.ToImmutableList();
+        public IReadOnlyCollection<TKey> ApiKeys => _apiKeys.Values.ToImmutableList();
 
         public ApiKeyManager(
-            IApiKeyFactory<T> apiKeyFactory,
+            IApiKeyFactory<TKey> apiKeyFactory,
             IOptionsMonitor<ApiKeyRotationOptions> optionsMonitor)
         {
             _apiKeyFactory = apiKeyFactory;
             _optionsMonitor = optionsMonitor;
+            InitializeAsync().GetAwaiter().GetResult();
             _optionsMonitor.OnChange(async options => await HandleOptionsChangedAsync(options));
         }
 
@@ -35,7 +34,7 @@ namespace HallyuVault.Etl.ApiKeyRotator.Core
             {
                 if (_isInitialized) return;
 
-                var tasks = _optionsMonitor.CurrentValue.ApiKeys.Select(AddAsync);
+                var tasks = _optionsMonitor.CurrentValue.Keys.Select(AddAsync);
                 await Task.WhenAll(tasks);
                 _isInitialized = true;
             }
@@ -45,29 +44,27 @@ namespace HallyuVault.Etl.ApiKeyRotator.Core
             }
         }
 
-        public async Task<Result<T>> AddAsync(string apiKey)
+        public async Task<TKey> AddAsync(string apiKey)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
-                return Result.Failure<T>(new Error("EmptyKey", "API key cannot be null or empty"));
+                throw new ArgumentException("API selectionArg cannot be empty", nameof(apiKey));
 
-            var result = await _apiKeyFactory.CreateAsync(apiKey);
-            if (result.IsSuccess)
-                _apiKeys[apiKey] = result.Value;
+            var key = await _apiKeyFactory.CreateAsync(apiKey);
+            _apiKeys.TryAdd(apiKey, key);
 
-            return result;
+            return key;
         }
 
-        public Result<T> Get(int estimitedCredits)
+        public TKey? Get(TSelectionArg selectionArg)
         {
             if (!_isInitialized)
-                return Result.Failure<T>(new Error("NotInitialized", "Manager not initialized")); // exception
+                throw new InvalidOperationException("Manager not initialized");
 
-            var selected = SelectKey(estimitedCredits);
-            // id null is not
-            return Result.Success(selected);
+            var selected = SelectKey(selectionArg);
+            return selected;
         }
 
-        protected abstract T SelectKey(int estimitedCredits);
+        protected abstract TKey? SelectKey(TSelectionArg selectionArg);
 
         private async Task HandleOptionsChangedAsync(ApiKeyRotationOptions options)
         {
@@ -75,7 +72,7 @@ namespace HallyuVault.Etl.ApiKeyRotator.Core
             try
             {
                 var current = _apiKeys.Keys.ToHashSet();
-                var incoming = options.ApiKeys.ToHashSet();
+                var incoming = options.Keys.ToHashSet();
 
                 var toAdd = incoming.Except(current);
                 var addTasks = toAdd.Select(AddAsync);

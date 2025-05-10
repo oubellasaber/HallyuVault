@@ -8,21 +8,19 @@ namespace HallyuVault.Etl.FileCryptExtractor.DomainServices;
 public sealed class LinkResolvingService
 {
     private readonly HttpClient _client;
-    private readonly FileCryptSettings _settings;
+    private readonly FileCryptOptions _settings;
 
     public LinkResolvingService(IHttpClientFactory httpClientFactory,
-                                IOptions<FileCryptSettings> settings)
+                                IOptions<FileCryptOptions> settings)
     {
-        _client = httpClientFactory.CreateClient("Default");
+        _client = httpClientFactory.CreateClient("NoAutoRedirectClient");
         _settings = settings.Value;
     }
 
     public async Task<Result<Uri>> Resolve(string id, FileCryptHeader fileCryptHeader)
     {
         var requestUrl = new Uri(_settings.BaseUrl, $"{_settings.LinkEndpoint}/{id}.html");
-
         var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-
         request.Headers.Add(fileCryptHeader.PhpSessionCookie.HeaderName, fileCryptHeader.PhpSessionCookie.Value);
 
         var response = await _client.SendAsync(request);
@@ -35,13 +33,6 @@ public sealed class LinkResolvingService
         }
 
         string content = await response.Content.ReadAsStringAsync();
-
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            return Result.Failure<Uri>(
-                new Error("LinkResolvingService.EmptyResponse", "The fetched HTML content is empty.")
-            );
-        }
 
         Regex regex = new Regex(@"href='(?<redirect>[^']*)'");
 
@@ -61,19 +52,10 @@ public sealed class LinkResolvingService
                 );
         }
 
-        var finalReq = new HttpRequestMessage(HttpMethod.Get, resolvedUrl);
+        request = new HttpRequestMessage(HttpMethod.Get, resolvedUrl);
+        request.Headers.Add(fileCryptHeader.PhpSessionCookie.HeaderName, fileCryptHeader.PhpSessionCookie.Value);
+        response = await _client.SendAsync(request);
 
-        finalReq.Headers.Add(fileCryptHeader.PhpSessionCookie.HeaderName, fileCryptHeader.PhpSessionCookie.Value);
-        try
-        {
-            response = await _client.SendAsync(finalReq);
-        }
-        catch (Exception e)
-        {
-
-            return response?.RequestMessage?.RequestUri;
-        }
-
-        return response?.RequestMessage?.RequestUri;
+        return response?.Headers.Location;
     }
 }

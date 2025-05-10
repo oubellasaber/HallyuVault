@@ -23,8 +23,7 @@ namespace HallyuVault.Etl.DramaDayMediaParser.EpisodeParsing.BatchEpisodeParsing
             var rangeStart = int.Parse(firstMatch.Groups[1].Value);
             var rangeEnd = leftEp;
 
-            Range range = new Range(rangeStart, rangeEnd);
-            var batchEpisode = new BatchEpisode(range);
+            var batchEpisode = new BatchEpisode(rangeStart, rangeEnd);
 
             return batchEpisode;
         }

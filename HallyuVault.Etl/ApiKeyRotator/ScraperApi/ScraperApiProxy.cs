@@ -1,65 +1,58 @@
-﻿using HallyuVault.Etl.ScraperApiClient;
+﻿using HallyuVault.Etl.ApiKeyRotator.Abstractions;
+using HallyuVault.Etl.ScraperApiClient;
 
 namespace HallyuVault.Etl.ApiKeyRotator.ScraperApi
 {
     public class ScraperApiProxy
     {
-        private readonly ScraperApiKeyManager _scraperApiKeyManager;
-        private readonly ScraperApiClient.ScraperApiClient _scraperApiClient;
+        private readonly IApiKeyManager<ScraperApiKey, int> _apiKeyManager;
+        private readonly ScraperApiClient.ScraperApiClient _scraperClient;
+        private readonly RequestBuilder _builder;
+        private readonly HttpClient _httpClient;
 
         public ScraperApiProxy(
-            ScraperApiKeyManager scraperApiKeyManager,
-            ScraperApiClient.ScraperApiClient scraperApiClient)
+            IApiKeyManager<ScraperApiKey, int> keyManager,
+            ScraperApiClient.ScraperApiClient scraperClient,
+            RequestBuilder builder,
+            HttpClient httpClient)
         {
-            _scraperApiKeyManager = scraperApiKeyManager;
-            _scraperApiClient = scraperApiClient;
+            _apiKeyManager = keyManager;
+            _scraperClient = scraperClient;
+            _builder = builder;
+            _httpClient = httpClient;
         }
 
-        public async Task<HttpResponseMessage> GetAsync(RequestParameters parameters)
+        public async Task<HttpResponseMessage> SendAsync(Uri url, StringContent? content = null, HttpMethod? method = null)
         {
-            int estimatedCost = _scraperApiClient.GetEstimatedCreditCost(parameters);
-            var apiKeyResult = _scraperApiKeyManager.Get(estimatedCost);
+            method ??= HttpMethod.Post;
 
-            if (apiKeyResult.IsFailure)
+            _builder.ForUrl(url).WithPremium();
+            int estimated = _scraperClient.EstimateCost(_builder.Parameters);
+            var apiKey = _apiKeyManager.Get(estimated);
+
+            if (apiKey != null)
             {
-                throw new Exception("No usable API apiKeyResult found.");
+                var scraperRequest = _builder.WithApiKey(apiKey.Key)
+                                             .Build(method, content);
+
+                var scraperResponse = await _scraperClient.SendAsync(scraperRequest);
+                int actual = _scraperClient.GetCostFromResponse(scraperResponse);
+
+                if (scraperResponse.IsSuccessStatusCode)
+                    apiKey.UpdateConsumedCredits(estimated, actual);
+                else
+                    apiKey.UpdateConsumedCredits(-estimated);
+
+                return scraperResponse;
             }
 
-            var apiKey = apiKeyResult.Value;
-
-            var response = await _scraperApiClient.GetAsync(parameters);
-            var actualCost = _scraperApiClient.GetCostFromResponse(response);
-
-            if (response.IsSuccessStatusCode)
-                apiKey.UpdateConsumedCredits(estimatedCost, actualCost);
-            else
-                apiKey.UpdateConsumedCredits(-estimatedCost);
-
-            return response;
-        }
-
-        public async Task<HttpResponseMessage> PostAsync(RequestParameters parameters, StringContent content)
-        {
-            int estimatedCost = _scraperApiClient.GetEstimatedCreditCost(parameters);
-            var apiKeyResult = _scraperApiKeyManager.Get(estimatedCost);
-
-            if (apiKeyResult.IsFailure)
+            // No usable API key: fallback to plain HttpClient
+            var fallbackRequest = new HttpRequestMessage(method, url)
             {
-                throw new Exception("No usable API apiKeyResult found.");
-            }
+                Content = content
+            };
 
-            var apiKey = apiKeyResult.Value;
-            parameters.ApiKey = apiKey.Key;
-
-            var response = await _scraperApiClient.PostAsync(parameters, content);
-            var actualCost = _scraperApiClient.GetCostFromResponse(response);
-
-            if (response.IsSuccessStatusCode)
-                apiKey.UpdateConsumedCredits(estimatedCost, actualCost);
-            else
-                apiKey.UpdateConsumedCredits(-estimatedCost);
-
-            return response;
+            return await _httpClient.SendAsync(fallbackRequest);
         }
     }
 }

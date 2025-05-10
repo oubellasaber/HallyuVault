@@ -1,15 +1,19 @@
-﻿namespace HallyuVault.Etl.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace HallyuVault.Etl.Models
 {
     public class MediaVersion
     {
         private readonly List<Episode> _episodes = new();
+
+        private MediaVersion() { }
 
         public MediaVersion(string name)
         {
             Name = name;
         }
 
-        public int Id { get; private set; }
+        public int Id { get; set; }
         public string Name { get; private set; }
         public IReadOnlyCollection<Episode> Episodes => _episodes.AsReadOnly();
 
@@ -18,6 +22,6 @@
             _episodes.Add(episode);
         }
 
-        public static readonly MediaVersion Default = new MediaVersion("Default");
+        public static MediaVersion Default => new MediaVersion("Default");
     }
 }

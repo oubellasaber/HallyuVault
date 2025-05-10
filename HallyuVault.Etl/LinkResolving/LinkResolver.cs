@@ -5,6 +5,16 @@ namespace HallyuVault.Etl.LinkResolving
     public class LinkResolver : ILinkResolver
     {
         private readonly IEnumerable<ISpecializedLinkResolver> _linkResolvers;
+        private static readonly HashSet<string> _preResolvedLinksHosts = new()
+        {
+            "pixeldrain.com",
+            "send.cm",
+            "datanodes.to",
+            "buzzheavier.com",
+            "akirabox.com",
+            "mega.nz"
+        };
+
 
         public LinkResolver(IEnumerable<ISpecializedLinkResolver> linkResolvers)
         {
@@ -14,6 +24,14 @@ namespace HallyuVault.Etl.LinkResolving
         // ToDo. Add validators for links resolvers
         public async Task<Result<string>> ResolveAsync(string link)
         {
+            var url = new Uri(link);
+
+            // Check if the link is already resolved
+            if (_preResolvedLinksHosts.Contains(url.Host))
+            {
+                return link;
+            }
+
             foreach (var resolver in _linkResolvers)
             {
                 var result = await resolver.ResolveAsync(link);

@@ -1,43 +1,66 @@
-﻿namespace HallyuVault.Etl.ScraperApiClient
+﻿using Microsoft.Extensions.Options;
+
+namespace HallyuVault.Etl.ScraperApiClient
 {
     public class RequestBuilder
     {
-        private readonly ScraperApiClient _client;
-        private readonly RequestParameters _options = new RequestParameters();
+        private readonly ScraperApiOptions _options;
+        public RequestParameters Parameters { get; private set; } = new();
 
-        public RequestBuilder(ScraperApiClient client)
+        public RequestBuilder(IOptions<ScraperApiOptions> options)
         {
-            _client = client;
+            _options = options.Value;
+        }
+
+        public RequestBuilder WithApiKey(string apiKey)
+        {
+            Parameters.ApiKey = apiKey;
+            return this;
         }
 
         public RequestBuilder ForUrl(Uri url)
         {
-            _options.Url = url;
+            Parameters.Url = url;
             return this;
         }
 
         public RequestBuilder WithJavaScript()
         {
-            _options.RenderJavaScript = true;
+            Parameters.RenderJavaScript = true;
             return this;
         }
 
         public RequestBuilder WithPremium()
         {
-            _options.Premium = true;
+            Parameters.Premium = true;
             return this;
         }
 
-        // Additional builder methods...
-
-        public Task<HttpResponseMessage> GetAsync()
+        public ScraperRequest Build(HttpMethod method, StringContent? content = null)
         {
-            return _client.GetAsync(_options);
+            string fullUrl = BuildRequestUrl(Parameters);
+            return new ScraperRequest
+            {
+                Url = new Uri(fullUrl),
+                Method = method,
+                Content = content
+            };
         }
 
-        public Task<HttpResponseMessage> PostAsync(StringContent content)
+        private string BuildRequestUrl(RequestParameters parameters)
         {
-            return _client.PostAsync(_options, content);
+            var queryParams = new Dictionary<string, string>
+            {
+                ["api_key"] = parameters.ApiKey,
+                ["url"] = parameters.Url.ToString()
+            };
+
+            if (parameters.RenderJavaScript) queryParams["render"] = "true";
+            if (parameters.Premium) queryParams["premium"] = "true";
+
+            var queryString = string.Join("&", queryParams.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
+            return $"{_options.BaseUrl}?{queryString}";
         }
     }
+
 }

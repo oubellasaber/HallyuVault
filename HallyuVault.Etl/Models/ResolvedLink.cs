@@ -9,6 +9,8 @@
         // Navigation
         public DramaDayLink ParentRawLink { get; set; }
 
+        private ResolvedLink() { }
+
         public ResolvedLink(Uri resolvedLinkUrl, DramaDayLink parentRawLink)
         {
             ResolvedLinkUrl = resolvedLinkUrl;
